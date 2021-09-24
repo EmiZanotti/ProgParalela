@@ -3,7 +3,10 @@
 static long num_steps = 10000;	double step;
 #define NUM_THREADS 2
 
+//https://www.youtube.com/watch?v=OuzYICZUthM&list=PLLX-Q6B8xqZ8n8bwjGdzBJ25X2utwnoEG&index=7
+
 void main()
+
 {
 	int i, nthreads; double pi, sum[NUM_THREADS];
 	step = 1.0/(double)num_steps;
