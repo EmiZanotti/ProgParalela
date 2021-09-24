@@ -1,32 +1,30 @@
+#include "omp.h"
 #include <stdio.h>
-#include <omp.h>
+static long num_steps = 10000;	double step;
+#define NUM_THREADS 2
 
-static long num_steps = 1000000000;
-double step;
-
-//https://www.youtube.com/watch?v=FQ1k_YpyG_A&list=PLLX-Q6B8xqZ8n8bwjGdzBJ25X2utwnoEG&index=6
-int main ()
+void main()
 {
-	  int i;
-	  double x, pi, sum = 0.0;
-	  double inicio, fin;
+	int i, nthreads; double pi, sum[NUM_THREADS];
+	step = 1.0/(double)num_steps;
 
-	  step = 1.0/(double) num_steps;
+	omp_set_num_threads(NUM_THREADS);
 
-        	 
-	  inicio = omp_get_wtime();
+	#pragma omp parallel
+	{
+		int i, id, nthrds;	double x;
+		id = omp_get_thread_num();
+		nthrds = omp_get_num_threads();
+		if(id == 0) nthreads = nthrds;
 
-	  for (i=1;i<= num_steps; i++){
-		  x = (i-0.5)*step;
-		  sum = sum + 4.0/(1.0+x*x);
-	  }
+		for (i = id, sum[id] = 0.0; i < num_steps;i = i+nthrds)
+		{
+			x = (i+0.5)*step;
+			sum[id]+=4.0/(1.0+x*x);
+		}
+	}
 
-	  pi = step * sum;
-	  fin = omp_get_wtime() - inicio;
-	  printf("\n valor de pi con %ld pasos es %lf y corrio en %lf segundos \n ",num_steps,pi,fin);
-}	  
+	for(i=0, pi=0.0; i<nthreads; i++) pi += sum[i] * step;
 
-
-
-
-
+		printf("Valor de pi: (%lf)",pi);
+}
