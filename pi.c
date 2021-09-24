@@ -1,14 +1,12 @@
 #include "omp.h"
 #include <stdio.h>
 static long num_steps = 10000;	double step;
+#define PAD 8 //asume 64 byte L1 cache 
 #define NUM_THREADS 2
 
-//https://www.youtube.com/watch?v=OuzYICZUthM&list=PLLX-Q6B8xqZ8n8bwjGdzBJ25X2utwnoEG&index=7
-
 void main()
-
 {
-	int i, nthreads; double pi, sum[NUM_THREADS];
+	int i, nthreads; double pi, sum[NUM_THREADS][PAD];
 	step = 1.0/(double)num_steps;
 
 	omp_set_num_threads(NUM_THREADS);
@@ -23,11 +21,11 @@ void main()
 		for (i = id, sum[id] = 0.0; i < num_steps;i = i+nthrds)
 		{
 			x = (i+0.5)*step;
-			sum[id]+=4.0/(1.0+x*x);
+			sum[id][0]+=4.0/(1.0+x*x);
 		}
 	}
 
-	for(i=0, pi=0.0; i<nthreads; i++) pi += sum[i] * step;
+	for(i=0, pi=0.0; i<nthreads; i++) pi += sum[i][0] * step;
 
 		printf("Valor de pi: (%lf)",pi);
 }
